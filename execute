@@ -1,0 +1,103 @@
+#! /bin/bash -e
+
+DOCKER_IMAGE=laravel
+DOCKER_USER=' -u 1000:1000 '
+
+REPOSITORY_NAME="danielws/$DOCKER_IMAGE"
+
+VERSION_REGEX='^.*([0-9]+\.[0-9]+).*'
+
+function get_composer_version {
+  docker run --rm $DOCKER_USER $DOCKER_IMAGE composer -V | sed -r "s/$VERSION_REGEX/\1/"
+}
+
+function get_laravel_version {
+  docker run --rm $DOCKER_USER $DOCKER_IMAGE laravel -V | sed -r "s/$VERSION_REGEX/\1/"
+}
+
+function get_php_version {
+  docker run --rm $DOCKER_USER $DOCKER_IMAGE php -v | sed '1!d' | sed -r "s/$VERSION_REGEX/\1/"
+}
+
+function is_logged? {
+  logged=$(sed '/"auth": ".*"/!d' ~/.docker/config.json)
+
+  if [ -z "$logged"  ];then
+    echo 'false'
+  else
+    echo 'true'
+  fi
+}
+
+function build_tag {
+  echo "p$(get_php_version)-l$(get_laravel_version)-c$(get_composer_version)"
+}
+
+function tag_exists? {
+  response=$(curl -s https://hub.docker.com/v2/repositories/$REPOSITORY_NAME/tags/ | sed "/\"name\": \"$TAG\"/!d")
+
+  if [ -z "$response"  ];then
+    echo 'false'
+  else
+    echo 'true'
+  fi
+}
+
+function build_image {
+  docker build -t $DOCKER_IMAGE $(dirname $0)
+}
+
+function tag_image {
+  docker tag $DOCKER_IMAGE $REPOSITORY_NAME:$TAG
+  docker tag $DOCKER_IMAGE $REPOSITORY_NAME:latest
+}
+
+function push_image {
+  echo -e "\n\n\n"
+
+  if [ $(is_logged?) == 'false' ];then
+    docker login
+  fi
+
+  docker push $REPOSITORY_NAME:$TAG
+  docker push $REPOSITORY_NAME:latest
+}
+
+function default_deploy {
+  build_image
+  TAG=$(build_tag)
+
+  if [ $(tag_exists?) == 'true' ];then
+    echo -e "\n\n A tag: $TAG  já existem em $REPOSITORY_NAME\n\n"
+    echo -e " Push abortado...\n\n"
+    exit 1
+  fi
+
+  tag_image
+  push_image
+}
+
+function forced_deploy {
+  build_image
+  TAG=$(build_tag)
+  tag_image
+  push_image
+}
+
+case "$1" in
+  build)
+    build_image
+    TAG=$(build_tag)
+    tag_image
+    ;;
+  deploy)
+
+    if [ "$2" == '--force' ];then
+      forced_deploy
+    else
+      default_deploy
+    fi
+
+    echo -e "\n\n Image $DOCKER_IMAGE deployed as $REPOSITORY_NAME:$TAG"
+    ;;
+esac
