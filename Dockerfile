@@ -23,3 +23,6 @@ USER 1000:1000
 RUN composer global require "laravel/installer"
 
 ENV PATH=$PATH:/home/user/.composer/vendor/bin/
+
+RUN echo 'alias artisan="php artisan"' >> ~/.bashrc
+RUN echo 'alias server="php artisan serve --host 0.0.0.0"' >> ~/.bashrc
