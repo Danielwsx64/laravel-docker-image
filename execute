@@ -100,4 +100,10 @@ case "$1" in
 
     echo -e "\n\n Image $DOCKER_IMAGE deployed as $REPOSITORY_NAME:$TAG"
     ;;
+  *)
+    echo -e "\n\n Use: \n"
+    echo -e " $0 build   -  To build Docker image"
+    echo -e " $0 deploy  -  To build and push Docker image"
+    echo -e "\n you can use --force to ignore tag check on push"
+    ;;
 esac
