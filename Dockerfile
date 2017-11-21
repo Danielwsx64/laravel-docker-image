@@ -7,6 +7,7 @@ RUN apt-get install git -y --force-yes
 # Lavarel requires php-zip extension
 RUN apt-get install zlib1g-dev -y --force-yes
 RUN docker-php-ext-install zip
+RUN docker-php-ext-install pdo_mysql
 
 RUN useradd -s /bin/bash -u 1000 -U -m user
 
