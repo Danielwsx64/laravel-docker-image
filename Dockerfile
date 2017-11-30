@@ -4,6 +4,9 @@ RUN apt-get update
 
 RUN apt-get install git -y --force-yes
 
+#Install dev tools
+RUN apt-get install telnet mysql-client -y --force-yes
+
 # Lavarel requires php-zip extension
 RUN apt-get install zlib1g-dev -y --force-yes
 RUN docker-php-ext-install zip
