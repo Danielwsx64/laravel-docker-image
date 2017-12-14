@@ -5,7 +5,7 @@ DOCKER_USER=' -u 1000:1000 '
 
 REPOSITORY_NAME="danielws/$DOCKER_IMAGE"
 
-VERSION_REGEX='^.*([0-9]+\.[0-9]+\.[0-9]+).*'
+VERSION_REGEX='^.* ([0-9]+\.[0-9]+).*'
 
 function get_composer_version {
   docker run --rm $DOCKER_USER $DOCKER_IMAGE composer -V | sed -r "s/$VERSION_REGEX/\1/"
@@ -30,7 +30,7 @@ function is_logged? {
 }
 
 function build_tag {
-  echo "p$(get_php_version)-l$(get_laravel_version)-c$(get_composer_version)"
+  echo "PHP$(get_php_version)_LAR$(get_laravel_version)_COM$(get_composer_version)"
 }
 
 function tag_exists? {
