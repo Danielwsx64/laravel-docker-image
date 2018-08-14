@@ -2,15 +2,16 @@ FROM php:7.1-jessie
 
 RUN apt-get update
 
-RUN apt-get install git -y --force-yes
-
 #Install dev tools
-RUN apt-get install telnet mysql-client -y --force-yes
+RUN apt-get install nodejs npm git telnet mysql-client libpq-dev -y --force-yes
+
+RUN apt-get clean && apt-get autoclean
 
 # Lavarel requires php-zip extension
 RUN apt-get install zlib1g-dev -y --force-yes
 RUN docker-php-ext-install zip
 RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install pdo_pgsql
 
 RUN useradd -s /bin/bash -u 1000 -U -m user
 
